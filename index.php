@@ -5,7 +5,7 @@ session_start();
 
 $codigo_correcto = "1234";
 
-// Validar código
+// LOGIN
 if(isset($_POST['codigo'])){
     if($_POST['codigo'] == $codigo_correcto){
         $_SESSION['acceso'] = true;
@@ -13,6 +13,8 @@ if(isset($_POST['codigo'])){
         $error = "Código incorrecto";
     }
 }
+
+// CONEXIÓN BD
 $conn = new mysqli("localhost", "root", "", "app_db");
 
 if ($conn->connect_error) {
@@ -34,27 +36,36 @@ if(isset($_POST['nombre']) && isset($_POST['correo']) && isset($_POST['telefono'
         $mensaje = "Error al registrar";
     }
 }
+
+// CERRAR SESIÓN
+if(isset($_POST['logout'])){
+    session_destroy();
+    header("Location: index.php");
+}
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
-<title>Sistema de Usuarios</title>
+<title>Sistema PRO</title>
 
 <style>
 body {
     font-family: Arial;
-    background: linear-gradient(to right, #667eea, #764ba2);
+    background: linear-gradient(to right, #1db954, #121212);
+    color: white;
     text-align: center;
-    padding: 50px;
+    padding: 40px;
 }
 
 .box {
     background: white;
-    padding: 30px;
+    color: black;
+    padding: 25px;
     border-radius: 15px;
-    width: 320px;
+    width: 340px;
     margin: auto;
-    box-shadow: 0px 0px 15px rgba(0,0,0,0.3);
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.4);
 }
 
 input {
@@ -66,7 +77,7 @@ input {
 }
 
 button {
-    background: #667eea;
+    background: #1db954;
     color: white;
     padding: 10px;
     border: none;
@@ -75,7 +86,11 @@ button {
 }
 
 button:hover {
-    background: #764ba2;
+    background: #14833b;
+}
+
+.musica button {
+    margin: 5px;
 }
 </style>
 </head>
@@ -86,30 +101,49 @@ button:hover {
 
 <?php if(!isset($_SESSION['acceso'])) { ?>
 
-    <h2>Acceso</h2>
-<form method="POST">
-        <input type="password" name="codigo" placeholder="Código" required>
+    <h2>🔐 Acceso</h2>
+
+    <form method="POST">
+        <input type="password" name="codigo" placeholder="Ingresa tu PIN" required>
         <button type="submit">Entrar</button>
     </form>
+
+    <br>
+
+    <form method="POST">
+        <button name="mostrarRegistro">Registrarse</button>
+    </form>
+
+    <?php if(isset($_POST['mostrarRegistro'])) { ?>
+
+        <hr>
+
+        <h2>👤 Crear cuenta</h2>
+
+        <form method="POST">
+            <input type="text" name="nombre" placeholder="Nombre" required>
+            <input type="text" name="correo" placeholder="Correo" required>
+            <input type="text" name="telefono" placeholder="Teléfono" required>
+            <button type="submit">Guardar</button>
+        </form>
+
+        <?php if(isset($mensaje)) echo "<p>$mensaje</p>"; ?>
+
+    <?php } ?>
 
     <?php if(isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
 
 <?php } else { ?>
 
-    <h2>Registrar Usuario</h2>
+    <h2>✨ Bienvenida</h2>
 
     <form method="POST">
-        <input type="text" name="nombre" placeholder="Nombre" required>
-        <input type="text" name="correo" placeholder="Correo" required>
-        <input type="text" name="telefono" placeholder="Teléfono" required>
-        <button type="submit">Guardar</button>
+        <button name="logout">Cerrar sesión</button>
     </form>
-
-    <?php if(isset($mensaje)) echo "<p>$mensaje</p>"; ?>
 
     <hr>
 
-    <h2>Buscar Usuario</h2>
+    <h2>🔎 Buscar Usuario</h2>
 
     <form method="POST">
         <input type="text" name="correo" placeholder="Buscar correo">
@@ -117,7 +151,7 @@ button:hover {
     </form>
 
     <?php
-    if(isset($_POST['correo']) && !isset($_POST['nombre'])){
+    if(isset($_POST['correo'])){
         $correo = $_POST['correo'];
 
         $sql = "SELECT * FROM usuarios WHERE correo='$correo'";
@@ -136,9 +170,40 @@ button:hover {
     }
     ?>
 
+    <hr>
+
+    <h2>🎧 Música</h2>
+
+    <div class="musica">
+        <button onclick="abrir('Karol G')">Karol G</button>
+        <button onclick="abrir('Bad Bunny')">Bad Bunny</button>
+        <button onclick="abrir('Peso Pluma')">Peso Pluma</button>
+        <button onclick="abrir('Natanael Cano')">Natanael Cano</button>
+        <button onclick="abrir('Plim Plim')">Plim Plim</button>
+        <button onclick="abrir('Calle 24')">Calle 24</button>
+    </div>
+
+    <br>
+
+    <input type="text" id="busqueda" placeholder="Buscar canción">
+    <button onclick="buscar()">Buscar</button>
+
 <?php } ?>
 
 </div>
+
+<script>
+function buscar(){
+    let texto = document.getElementById("busqueda").value;
+    let url = "https://www.youtube.com/results?search_query=" + encodeURIComponent(texto);
+    window.open(url, "_blank");
+}
+
+function abrir(artista){
+    let url = "https://www.youtube.com/results?search_query=" + encodeURIComponent(artista);
+    window.open(url, "_blank");
+}
+</script>
 
 </body>
 </html>
